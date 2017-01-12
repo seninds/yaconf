@@ -21,7 +21,7 @@ except NameError:
     basestring = str
 
 
-from exceptions import PlainConfigError, ParsingError
+from exceptions import ConfigError, ParsingError
 
 
 logger = logging.getLogger('plain_config')
@@ -42,7 +42,7 @@ class PlainConfig(object):
         if data is not None:
             try:
                 self.update(data)
-            except PlainConfigError:
+            except ConfigError:
                 for item in data:
                     self.update(item)
 
@@ -57,14 +57,11 @@ class PlainConfig(object):
             self._update_file(data)
         else:
             type_str = type(data).__name__
-            raise PlainConfigError('unknown data type: %s' % type_str)
+            raise ConfigError('unknown data type: {}'.format(type_str))
 
-    def get(self, opt, converter=None, default=None):
+    def get(self, opt, default=None, converter=str):
         if opt in self._data:
-            if converter is None:
-                return self._data[opt]
             return converter(self._data[opt])
-
         if default is not None:
             return default
         raise KeyError(opt)
@@ -76,12 +73,16 @@ class PlainConfig(object):
     def items(self, prefix=None):
         prefix_len = 0
         opt_gen = self._data.keys()
+
         if prefix is not None:
             prefix_len = len(prefix + '.')
             opt_gen = (x for x in self._data if x.startswith(prefix + '.'))
 
         for opt in opt_gen:
             yield opt[prefix_len:], self.get(opt)
+
+    def subconfig(self, prefix):
+        return self[prefix:]
 
     def __repr__(self):
         return '<{}: {:d} opts>'.format(type(self).__name__, len(self._data))
@@ -93,11 +94,48 @@ class PlainConfig(object):
     def __eq__(self, config):
         return self._data == config._data
 
-    def __getitem__(self, opt):
-        return self.get(opt)
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            kwargs = {'strict': self._strict, 'encoding': self._encoding}
+            return type(self)(data=dict(self.items(index.start)), **kwargs)
+        return self.get(index)
 
-    def __setitem__(self, opt, value):
-        return self.set(opt, value)
+    def __setitem__(self, index, value):
+        if isinstance(index, slice):
+            if not isinstance(value, Mapping):
+                msg = '{} is not Mapping instance'.format(type(value).__name__)
+                raise ConfigError(msg)
+
+            kwargs = {'strict': self._strict, 'encoding': self._encoding}
+            config = type(self)(data=value, **kwargs)
+
+            del self[index]
+            for k, v in config.items():
+                self.set('{}.{}'.format(index.start, k), v)
+            return value
+
+        return self.set(index, value)
+
+    def __delitem__(self, index):
+        if isinstance(index, slice):
+            prefix = index.start + '.'
+            del_opts = [opt for opt in self if opt.startswith(prefix)]
+            for opt in del_opts:
+                del self[opt]
+        else:
+            del self._data[index]
+
+    def __contains__(self, opt):
+        return opt in self._data
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __bool__(self):
+        return bool(self._data)
+
+    def __len__(self):
+        return len(self._data)
 
     def __copy__(self):
         cls = self.__class__
@@ -122,16 +160,16 @@ class PlainConfig(object):
             for opt, val in section.items():
                 self._data['{}.{}'.format(section_name, opt)] = val
 
-    def _update_dict(self, dict_data):
+    def _update_dict(self, dict_data, converter=str):
         data = {}
         cum_error = []
 
         for opt, value in dict_data.items():
             if self._VALID_OPT.match(opt) is None:
-                msg = 'invalid option name: {}'
+                msg = 'update by dict: invalid option name: {}'
                 cum_error.append(msg.format(opt))
             else:
-                data[opt] = str(value)
+                data[opt] = converter(value)
 
         if cum_error:
             raise ParsingError('\n'.join(cum_error))

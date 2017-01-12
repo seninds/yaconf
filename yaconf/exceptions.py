@@ -1,9 +1,9 @@
 # coding: utf-8
 
 
-class PlainConfigError(Exception):
+class ConfigError(Exception):
     """Common PlainConfig Error."""
 
 
-class ParsingError(PlainConfigError):
+class ParsingError(ConfigError):
     """Error which is raised during parsing config file."""

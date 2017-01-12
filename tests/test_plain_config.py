@@ -44,7 +44,7 @@ class PlainConfigTest(unittest.TestCase):
                  ParsingError),
         ]
 
-    def test_get_set(self):
+    def test_set_get(self):
         config = PlainConfig()
 
         self.assertEqual(config.set('set_opt', 'set_value'), 'set_value')
@@ -52,10 +52,50 @@ class PlainConfigTest(unittest.TestCase):
 
         self.assertEqual(config.get('bad_opt', default='def_val'), 'def_val')
         self.assertEqual(config.get('bad_opt', default=123), 123)
+        self.assertEqual(config.get('bad_opt', 'pos_arg'), 'pos_arg')
+
+    def test_setitem_getitem(self):
+        config = PlainConfig()
 
         retval = config['setitem_opt'] = 'setitem_value'
         self.assertEqual(retval, 'setitem_value')
         self.assertEqual(config['setitem_opt'], 'setitem_value')
+
+        config['base.old_opt'] = 'old_val'
+        subconfig = {'opt': '123', 'sub.opt': 'test'}
+        config['base':] = subconfig
+        self.assertFalse('base.old_opt' in config)
+        self.assertEqual(Counter(config['base':].items()),
+                         Counter(subconfig.items()))
+
+    def test_subconfig(self):
+        data = {'opt': '0', 'base.opt': '1', 'sub.opt0': '2', 'sub.opt1': '3'}
+        config = PlainConfig(data)
+        self.assertEqual(Counter(config.items()), Counter(data.items()))
+        self.assertEqual(Counter(config.subconfig('sub').items()),
+                         Counter(config.items('sub')))
+        self.assertEqual(len(config.subconfig('null')), 0)
+
+    def test_bool(self):
+        config = PlainConfig()
+        self.assertFalse(bool(config))
+        config['opt'] = 'val'
+        self.assertTrue(bool(config))
+
+    def test_delitem(self):
+        data = {'imm': 'val', 'opt': '1', 'sub.opt0': '2', 'sub.opt1': '3'}
+        config = PlainConfig(data)
+        self.assertEqual(Counter(config.items()), Counter(data.items()))
+
+        del config['opt']
+        del data['opt']
+        self.assertEqual(Counter(config.items()), Counter(data.items()))
+
+        del config['sub':]
+        del_opts = [opt for opt in data if opt.startswith('sub.')]
+        for opt in del_opts:
+            del data[opt]
+        self.assertEqual(Counter(config.items()), Counter(data.items()))
 
     def test_converters(self):
         config = PlainConfig()
@@ -250,6 +290,17 @@ class PlainConfigTest(unittest.TestCase):
                     plain_config, raw_config]
             config = PlainConfig(data)
             self.assertEqual(Counter(config.items()), Counter(opts.items()))
+
+    def test_contains(self):
+        config = PlainConfig({'opt0': 'test', 'opt1': 123})
+        self.assertTrue('opt0' in config)
+        self.assertTrue('opt1' in config)
+        self.assertFalse('bad_opt' in config)
+
+    def test_iter(self):
+        data_dict = {'opt0': 'test', 'opt1': 123}
+        config = PlainConfig(data_dict)
+        self.assertEqual(Counter(config), Counter(data_dict.keys()))
 
 
 if __name__ == '__main__':

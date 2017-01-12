@@ -224,6 +224,8 @@ class PlainConfigTest(unittest.TestCase):
         opts = {}
         config = PlainConfig()
 
+        config.update('/bad/path/to/config')
+
         for case in self.cases:
             if case.error is None:
                 opts.update(case.dict)

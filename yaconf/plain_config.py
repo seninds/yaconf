@@ -3,6 +3,7 @@
 import copy
 import io
 import logging
+import os.path
 import re
 
 try:
@@ -176,6 +177,8 @@ class PlainConfig(object):
         self._data.update(data)
 
     def _update_path(self, path):
+        if not os.path.exists(path):
+            return
         with io.open(path, 'r', encoding=self._encoding) as fileobj:
             self._update_file(fileobj)
 

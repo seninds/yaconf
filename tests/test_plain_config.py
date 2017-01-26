@@ -101,9 +101,9 @@ class PlainConfigTest(unittest.TestCase):
         config = PlainConfig()
 
         self.assertEqual(config.set('bool', True), 'True')
-        self.assertTrue(config.get('bool', converter=str2bool))
+        self.assertTrue(config.get('bool', conv=str2bool))
         self.assertEqual(config.set('bool', False), 'False')
-        self.assertFalse(config.get('bool', converter=str2bool))
+        self.assertFalse(config.get('bool', conv=str2bool))
 
         for mode, true, false in [(ON_OFF, 'on', 'off'),
                                   (YES_NO, 'yes', 'no'),
@@ -111,22 +111,22 @@ class PlainConfigTest(unittest.TestCase):
                                   (ONE_ZERO, '1', '0')]:
             self.assertEqual(config.set('bool', True,
                                         lambda x: bool2str(x, mode)), true)
-            self.assertTrue(config.get('bool', converter=str2bool))
+            self.assertTrue(config.get('bool', conv=str2bool))
             self.assertEqual(config.set('bool', False,
                                         lambda x: bool2str(x, mode)), false)
-            self.assertFalse(config.get('bool', converter=str2bool))
+            self.assertFalse(config.get('bool', conv=str2bool))
 
         self.assertEqual(config.set('float', 3.14), '3.14')
-        self.assertEqual(config.get('float', converter=float), 3.14)
+        self.assertEqual(config.get('float', conv=float), 3.14)
         self.assertEqual(config.set('int', 123), '123')
-        self.assertEqual(config.get('int', converter=int), 123)
+        self.assertEqual(config.get('int', conv=int), 123)
 
-        self.assertEqual(config.set('list', [1, 2, 3], converter=iter2str),
+        self.assertEqual(config.set('list', [1, 2, 3], conv=iter2str),
                          '1, 2, 3')
-        self.assertEqual(config.get('list', converter=str2iter),
+        self.assertEqual(config.get('list', conv=str2iter),
                          ['1', '2', '3'])
         self.assertEqual(
-            config.get('list', converter=lambda x: str2iter(x, converter=int)),
+            config.get('list', conv=lambda x: str2iter(x, conv=int)),
             [1, 2, 3]
         )
 

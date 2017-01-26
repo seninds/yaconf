@@ -60,15 +60,15 @@ class PlainConfig(object):
             type_str = type(data).__name__
             raise Error('unknown data type: {}'.format(type_str))
 
-    def get(self, opt, default=None, converter=str):
+    def get(self, opt, default=None, conv=str):
         if opt in self._data:
-            return converter(self._data[opt])
+            return conv(self._data[opt])
         if default is not None:
             return default
         raise KeyError(opt)
 
-    def set(self, opt, value, converter=str):
-        value = self._data[opt] = converter(value)
+    def set(self, opt, value, conv=str):
+        value = self._data[opt] = conv(value)
         return value
 
     def items(self, prefix=None):
@@ -161,7 +161,7 @@ class PlainConfig(object):
             for opt, val in section.items():
                 self._data['{}.{}'.format(section_name, opt)] = val
 
-    def _update_dict(self, dict_data, converter=str):
+    def _update_dict(self, dict_data, conv=str):
         data = {}
         cum_error = []
 
@@ -170,7 +170,7 @@ class PlainConfig(object):
                 msg = 'update by dict: invalid option name: {}'
                 cum_error.append(msg.format(opt))
             else:
-                data[opt] = converter(value)
+                data[opt] = conv(value)
 
         if cum_error:
             raise ParsingError('\n'.join(cum_error))

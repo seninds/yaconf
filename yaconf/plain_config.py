@@ -19,10 +19,10 @@ except ImportError:
 try:
     basestring
 except NameError:
-    basestring = str
+    basestring = unicode = str
 
 
-from exceptions import ConfigError, ParsingError
+from yaconf.exceptions import Error, ParsingError
 
 
 logger = logging.getLogger('plain_config')
@@ -43,7 +43,7 @@ class PlainConfig(object):
         if data is not None:
             try:
                 self.update(data)
-            except ConfigError:
+            except Error:
                 for item in data:
                     self.update(item)
 
@@ -58,7 +58,7 @@ class PlainConfig(object):
             self._update_file(data)
         else:
             type_str = type(data).__name__
-            raise ConfigError('unknown data type: {}'.format(type_str))
+            raise Error('unknown data type: {}'.format(type_str))
 
     def get(self, opt, default=None, converter=str):
         if opt in self._data:
@@ -105,7 +105,7 @@ class PlainConfig(object):
         if isinstance(index, slice):
             if not isinstance(value, Mapping):
                 msg = '{} is not Mapping instance'.format(type(value).__name__)
-                raise ConfigError(msg)
+                raise Error(msg)
 
             kwargs = {'strict': self._strict, 'encoding': self._encoding}
             config = type(self)(data=value, **kwargs)

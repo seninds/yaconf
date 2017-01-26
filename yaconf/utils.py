@@ -4,7 +4,7 @@
 try:
     basestring
 except NameError:
-    basestring = str
+    basestring = unicode = str
 
 
 ON_OFF = 'on off'

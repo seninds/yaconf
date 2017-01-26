@@ -1,9 +1,9 @@
 # coding: utf-8
 
 
-class ConfigError(Exception):
-    """Common PlainConfig Error."""
+class Error(Exception):
+    """Common yaconf error."""
 
 
-class ParsingError(ConfigError):
-    """Error which is raised during parsing config file."""
+class ParsingError(Error):
+    """Error while parse config file."""

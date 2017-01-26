@@ -2,6 +2,7 @@
 
 import copy
 import io
+import itertools
 import logging
 import os.path
 import re
@@ -12,9 +13,9 @@ except ImportError:
     from collections import Mapping
 
 try:
-    from configparser import ConfigParser
+    from configparser import ConfigParser, DEFAULTSECT
 except ImportError:
-    from ConfigParser import ConfigParser
+    from ConfigParser import ConfigParser, DEFAULTSECT
 
 try:
     basestring
@@ -157,9 +158,9 @@ class PlainConfig(object):
         if isinstance(config, PlainConfig):
             return self._data.update(config._data)
 
-        for section_name, section in config.items():
-            for opt, val in section.items():
-                self._data['{}.{}'.format(section_name, opt)] = val
+        for section in itertools.chain((DEFAULTSECT,), config.sections()):
+            for opt, val in config.items(section):
+                self._data['{}.{}'.format(section, opt)] = val
 
     def _update_dict(self, dict_data, conv=str):
         data = {}

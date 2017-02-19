@@ -23,7 +23,7 @@ except NameError:
     basestring = unicode = str
 
 
-from yaconf.exceptions import Error, ParsingError
+from .exceptions import Error, ParsingError
 
 
 logger = logging.getLogger('plain_config')

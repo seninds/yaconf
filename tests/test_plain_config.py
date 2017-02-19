@@ -11,13 +11,9 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser, DEFAULTSECT
 
-import context
 from yaconf import PlainConfig, ParsingError
 from yaconf.utils import bool2str, str2bool, iter2str, str2iter
 from yaconf.utils import ON_OFF, YES_NO, TRUE_FALSE, ONE_ZERO
-
-
-__fake_usage__ = [context]
 
 
 class PlainConfigTest(unittest.TestCase):

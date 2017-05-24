@@ -13,9 +13,9 @@ except ImportError:
     from collections import Mapping
 
 try:
-    from configparser import ConfigParser, DEFAULTSECT
+    from configparser import DEFAULTSECT
 except ImportError:
-    from ConfigParser import ConfigParser, DEFAULTSECT
+    from ConfigParser import DEFAULTSECT
 
 try:
     basestring
@@ -49,7 +49,8 @@ class PlainConfig(object):
                     self.update(item)
 
     def update(self, data):
-        if isinstance(data, (PlainConfig, ConfigParser)):
+        if (isinstance(data, PlainConfig) or
+                (hasattr(data, 'sections') and hasattr(data, 'items'))):
             self._update_config(data)
         elif isinstance(data, Mapping):
             self._update_dict(data)

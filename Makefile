@@ -1,4 +1,5 @@
-ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+PYTHON ?= python
 
 
 all: build
@@ -10,7 +11,7 @@ build:
 check: build
 	[ -L "$(ROOT_DIR)/tests/yaconf" ] || \
 		ln -s "$(ROOT_DIR)/yaconf" "$(ROOT_DIR)/tests/yaconf"
-	python -m unittest discover -s "$(ROOT_DIR)/tests" -v
+	${PYTHON} -m unittest discover -s "$(ROOT_DIR)/tests" -v
 
 
 clean:

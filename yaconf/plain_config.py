@@ -29,6 +29,10 @@ from .exceptions import Error, ParsingError
 logger = logging.getLogger('plain_config')
 
 
+class EMPTY_VALUE(object):
+    """Class to handle get() with empty default value."""
+
+
 class PlainConfig(object):
 
     _CONFIG_LINE = re.compile('^\s*(?P<option>.*?)\s*=\s*(?P<value>.*)$')
@@ -62,10 +66,10 @@ class PlainConfig(object):
             type_str = type(data).__name__
             raise Error('unknown data type: {}'.format(type_str))
 
-    def get(self, opt, default=None, conv=str):
+    def get(self, opt, default=EMPTY_VALUE, conv=str):
         if opt in self._data:
             return conv(self._data[opt])
-        if default is not None:
+        if default is not EMPTY_VALUE:
             return default
         raise KeyError(opt)
 

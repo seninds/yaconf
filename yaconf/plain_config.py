@@ -77,6 +77,14 @@ class PlainConfig(object):
         value = self._data[opt] = conv(value)
         return value
 
+    def sections(self):
+        for section, _ in itertools.groupby(
+            sorted(self._data),
+            key=lambda x: x.split('.')[0] if '.' in x else None
+        ):
+            if section is not None:
+                yield section
+
     def items(self, prefix=None):
         prefix_len = 0
         opt_gen = self._data.keys()

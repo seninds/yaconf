@@ -64,6 +64,14 @@ class PlainConfigTest(unittest.TestCase):
         self.assertEqual(Counter(config['base':].items()),
                          Counter(subconfig.items()))
 
+    def test_sections(self):
+        data = {
+            'opt0': '0', 'opt1': '1',
+            'sec0.opt0': '1', 'sec1.opt1': '2', 'sec0.opt1': '3'
+        }
+        config = PlainConfig(data)
+        self.assertEqual(Counter(config.sections()), Counter(['sec0', 'sec1']))
+
     def test_subconfig(self):
         data = {'opt': '0', 'base.opt': '1', 'sub.opt0': '2', 'sub.opt1': '3'}
         config = PlainConfig(data)

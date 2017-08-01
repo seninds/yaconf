@@ -17,7 +17,7 @@ check: build
 clean:
 	@rm -f "$(ROOT_DIR)/tests/yaconf"
 	@find "$(ROOT_DIR)" -type f -name "*.pyc" -delete
-	@find "$(ROOT_DIR)" -type d -name "__pycache__" -exec rm -rf "{}" \;
+	@find "$(ROOT_DIR)" -type d -name "__pycache__" | xargs rm -rf
 
 
 .PHONY: all build check clean
